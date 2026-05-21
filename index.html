@@ -290,7 +290,7 @@ margin-bottom: 16px;
 <div class="wrap">
 <header>
 <h1>Blufox Morning Message Generator</h1>
-<div class="sub">Drop yesterday's RGU and $ reports → grab today's GroupMe message</div>
+<div class="sub">Drop yesterday's Quantity and Net Profit reports → grab today's GroupMe message</div>
 </header>
 <div class="tabs">
 <button class="tab active" data-tab="setup">1. Upload &amp; Goal</button>
@@ -302,14 +302,14 @@ margin-bottom: 16px;
 <h2>Upload Reports</h2>
 <div class="uploads">
 <label class="drop" id="drop-rgu">
-<div class="drop-label">📊 RGU Report</div>
-<div class="drop-hint">Drag &amp; drop or click — RGU.xls</div>
+<div class="drop-label">📊 Quantity Report</div>
+<div class="drop-hint">Drag &amp; drop or click — Quantity.xls</div>
 <div class="file-status" id="status-rgu"></div>
 <input type="file" id="file-rgu" accept=".xls,.xlsx">
 </label>
 <label class="drop" id="drop-gp">
-<div class="drop-label">💵 $ Report</div>
-<div class="drop-hint">Drag &amp; drop or click — _.xls</div>
+<div class="drop-label">💵 Net Profit Report</div>
+<div class="drop-hint">Drag &amp; drop or click — Net Profit.xls</div>
 <div class="file-status" id="status-gp"></div>
 <input type="file" id="file-gp" accept=".xls,.xlsx">
 </label>
@@ -383,8 +383,7 @@ WATCHES: 28, // AC on RGU
 // Default custom closing message
 const DEFAULT_CUSTOM_MSG = `We need our floor generals to stay aggressive and continue driving results. Let's keep up our winning mentality and continue pushing the boundaries in our stores!
 
-Remember:
-No one walks without the talk and no pitch is complete without a sheet! We need everyone t-charting and following the sales process. Bring up accessories and NPS with every transaction and ensure that we are solving our customer's issues before they leave the store. Lock in, chat! It's time to win!!!`;
+Remember: No one walks without the talk and no pitch is complete without a sheet! We need everyone t-charting and following the sales process. Bring up accessories and NPS with every transaction and ensure that we are solving our customer's issues before they leave the store. Lock in, chat! It's time to win!!!`;
 const STORAGE_KEY = 'blufox-custom-closing-msg';
 // =========================================================
 // Tabs
@@ -524,15 +523,15 @@ document.getElementById('prev-xm').textContent = num(totals[COL.XM]).toLocaleStr
 document.getElementById('prev-tab').textContent = num(totals[COL.TABLETS]).toLocaleString();
 document.getElementById('prev-watch').textContent = num(totals[COL.WATCHES]).toLocaleString();
 } catch (e) {
-showError(`RGU file: ${e.message}`);
+showError(`Quantity Report: ${e.message}`);
 }
 }
 if (state.gpData) {
 try {
 const { totals } = extractStores(state.gpData);
-document.getElementById('prev-gp').textContent = '$' + num(totals[COL.GP]).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+document.getElementById('prev-gp').textContent = '$' + Math.round(num(totals[COL.GP])).toLocaleString('en-US');
 } catch (e) {
-showError(`$ file: ${e.message}`);
+showError(`Net Profit Report: ${e.message}`);
 }
 }
 }
@@ -547,7 +546,7 @@ function formatLeaderLine(emoji, entry, isCurrency) {
 if (!entry) return `${emoji} —`;
 const stores = entry.stores.join(', ');
 const val = isCurrency
-? '$' + entry.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+? '$' + Math.round(entry.value).toLocaleString('en-US')
 : String(entry.value);
 return `${emoji} ${stores} ${val}`;
 }
@@ -578,16 +577,15 @@ const goalDisplay = goal === '_____' ? '_____' : String(Number(goal));
 const xmStr = String(totalXM);
 const tabStr = String(totalTab);
 const wStr = String(totalW);
-const gpStr = '$' + totalGP.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const gpStr = '$' + Math.round(totalGP).toLocaleString('en-US');
 // Pull the custom closing message (fall back to default if blank)
 const customClosing = (customMsgEl.value || '').trim() || DEFAULT_CUSTOM_MSG;
 const message = `Gooooooooooood morning @everyone
 
-Yesterday, we finished with ${xmStr} XM, ${tabStr} tablets, and ${wStr} watches. We did exactly ${gpStr} in GP.
+Yesterday, we finished with ${xmStr} XM, ${tabStr} tablets, and ${wStr} watches. We earned exactly ${gpStr} in GP.
 
 
 Yesterday's Top Performers:
-
 
 📲 XM 📲
 
@@ -597,7 +595,6 @@ ${formatLeaderLine('🥈', xmTop[1], false)}
 
 ${formatLeaderLine('🥉', xmTop[2], false)}
 
-
 ⌚️ Watches ⌚️
 
 ${formatLeaderLine('🥇', wTop[0], false)}
@@ -605,7 +602,6 @@ ${formatLeaderLine('🥇', wTop[0], false)}
 ${formatLeaderLine('🥈', wTop[1], false)}
 
 ${formatLeaderLine('🥉', wTop[2], false)}
-
 
 💰 GP 💰
 
@@ -615,13 +611,11 @@ ${formatLeaderLine('🥈', gpTop[1], true)}
 
 ${formatLeaderLine('🥉', gpTop[2], true)}
 
-
-
 ${customClosing}
 
 Our goal for today is ${goalDisplay}.
 
-Let's gooooooooooooooooooo Blufox!!!!`;
+Let’s gooooooooooooooooooo Blufox!!!!`;
 document.getElementById('msg-output').textContent = message;
 switchTab('message');
 }
